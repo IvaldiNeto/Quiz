@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoGear Data Warehouse Knowledge Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 10px;
+        }
+        .question {
+            margin-bottom: 20px;
+        }
+        .question h3 {
+            margin-bottom: 10px;
+        }
+        .question label {
+            display: block;
+            margin: 5px 0;
+        }
+        .feedback {
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .correct {
+            color: green;
+        }
+        .incorrect {
+            color: red;
+        }
+        .submit-btn {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h2>AutoGear Data Warehouse Knowledge Quiz</h2>
+    <p>This quiz tests your knowledge of AutoGear's Data Warehouse concepts.</p>
+    <form id="quizForm" method="POST">
+        <!-- Questions will be injected here by JavaScript -->
+    </form>
+    <button type="submit" class="submit-btn">Submit Quiz</button>
+
+    <script>
+        // Example correct answers (indices correspond to the answers in Answers.txt)
+        const correctAnswers = [
+            "Centralize data and improve operational efficiency", // Question 1 correct answer
+            "Siloed data across multiple sources", // Question 2 correct answer
+            "Data-driven decision-making stage", // Question 3 correct answer
+            "AWS Glue", // Question 4 correct answer
+            "Implement technical infrastructure" // Question 5 correct answer
+        ];
+
+        // Function to fetch file content asynchronously using Fetch API
+        async function fetchFile(filePath) {
+            try {
+                const response = await fetch(filePath);
+                const text = await response.text();
+                return text.split('\n');
+            } catch (error) {
+                console.error("Error fetching the file: ", error);
+                return [];
+            }
+        }
+
+        // Function to create the quiz dynamically
+        async function generateQuiz() {
+            // Fetch the questions and answers from their respective files
+            const questions = await fetchFile('Questions.txt');
+            const answers = await fetchFile('Answers.txt');
+            
+            const form = document.getElementById('quizForm');
+
+            for (let i = 0; i < questions.length; i++) {
+                const questionDiv = document.createElement('div');
+                questionDiv.classList.add('question');
+                
+                const questionTitle = document.createElement('h3');
+                questionTitle.textContent = questions[i];
+                questionDiv.appendChild(questionTitle);
+
+                const answerChoices = answers[i].split(','); // Assuming answers are comma-separated
+
+                // Create radio buttons for multiple-choice options
+                answerChoices.forEach(function(answer) {
+                    const label = document.createElement('label');
+                    const input = document.createElement('input');
+                    input.type = 'radio';
+                    input.name = 'question' + i;
+                    input.value = answer;
+                    label.appendChild(input);
+                    label.appendChild(document.createTextNode(answer));
+
+                    // Add an event listener to handle answer selection
+                    input.addEventListener('change', function() {
+                        checkAnswer(input, i, answer);
+                    });
+
+                    questionDiv.appendChild(label);
+                });
+
+                form.appendChild(questionDiv);
+            }
+        }
+
+        // Function to check the selected answer
+        function checkAnswer(input, questionIndex, selectedAnswer) {
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.classList.add('feedback');
+
+            if (selectedAnswer === correctAnswers[questionIndex]) {
+                feedbackDiv.textContent = "Correct!";
+                feedbackDiv.classList.add('correct');
+            } else {
+                feedbackDiv.textContent = "Incorrect!";
+                feedbackDiv.classList.add('incorrect');
+            }
+
+            // Append feedback to the question
+            const questionDiv = input.closest('.question');
+            // Remove any previous feedback before adding new one
+            const previousFeedback = questionDiv.querySelector('.feedback');
+            if (previousFeedback) {
+                previousFeedback.remove();
+            }
+            questionDiv.appendChild(feedbackDiv);
+        }
+
+        // Generate the quiz when the page loads
+        window.onload = function() {
+            generateQuiz();
+        };
+    </script>
+</body>
+</html>
